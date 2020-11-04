@@ -1,5 +1,3 @@
-import { stat } from 'fs';
-import { off } from 'process';
 import React from 'react';
 import { render } from 'react-dom';
 
@@ -14,36 +12,70 @@ class AppDescription extends React.Component {
   }
 };
 
-function formatTime(time) { 
-  var m = time.slice(0,2);
-  var s = time.slice(3,6);
-  return (m+':'+s)
+const formatTime = (time) => { 
+  const m = Math.floor(time/60);
+  const s = time%60;
+  return `${m}:${addZero(s)}`;
 };
 
-step = () => {};
+const addZero = (number) => {
+  if (number < 10) {
+    return '0' + number;
+  }
 
-startTimer = () => {
-
-  this.setState({
-    timer: setInterval(this.step, 1000),
-  });
-
-};
+  return number;
+}
 
 class App extends React.Component {
   state = {
-    status: this.props.status || 'off',
-    time: this.props.time || '11:11',
+    status: 'off',
+    time: 0,
     timer: null,
+  }
+
+  step = () => {
+
+    if (this.state.time === 0 && this.state.status === 'work') {
+      this.setState({
+        ...this.state,
+        status: 'rest',
+        time: 20
+      });
+
+    } else if (this.state.time === 0 && this.state.status === 'rest') {
+      this.setState({
+        ...this.state,
+        status: 'work',
+        time: 20 * 60
+      });
+    } else {
+      this.setState({
+        ...this.state,
+        time: this.state.time - 1,
+      });
+    }
+  };
+
+  startTimer = () => {
+    this.setState({
+      status: 'work',
+      time: 20 * 60,
+      timer: setInterval(this.step, 1000),
+    });
+  };
+
+  stopTimer = () => {
+
+    clearInterval(this.state.timer);
+
+    this.setState({
+      ...this.state,
+      status: 'off'
+    });
   }
 
   render() {
     const { status } = this.state;
-
-    var d = new Date();
-    var n = d.getSeconds();
-    console.log(n)
-    this.state.time = '20:00';
 
     return (
       <div>
@@ -52,8 +84,8 @@ class App extends React.Component {
         {(status === 'work') && <img src="./images/work.png" />}
         {(status === 'rest') && <img src="./images/rest.png" />}
         {(status !== 'off') && <div className="timer">{formatTime(this.state.time)}</div>}
-        {(status === 'off') && <button className="btn" onClick={startTimer()}>Start</button>}
-        {(status !== 'off') && <button className="btn">Stop</button>}
+        {(status === 'off') && <button className="btn" onClick={this.startTimer}>Start</button>}
+        {(status !== 'off') && <button className="btn" onClick={this.stopTimer}>Stop</button>}
         <button className="btn btn-close">X</button>
       </div>
     )
