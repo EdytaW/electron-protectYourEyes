@@ -72,7 +72,11 @@ class App extends React.Component {
       ...this.state,
       status: 'off'
     });
-  }
+  };
+
+  closeApp() {
+    window.close();
+  };
 
   render() {
     const { status } = this.state;
@@ -86,7 +90,7 @@ class App extends React.Component {
         {(status !== 'off') && <div className="timer">{formatTime(this.state.time)}</div>}
         {(status === 'off') && <button className="btn" onClick={this.startTimer}>Start</button>}
         {(status !== 'off') && <button className="btn" onClick={this.stopTimer}>Stop</button>}
-        <button className="btn btn-close">X</button>
+        <button className="btn btn-close" onClick={this.closeApp}>X</button>
       </div>
     )
   }
